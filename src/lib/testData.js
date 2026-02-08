@@ -243,7 +243,7 @@ const TEST_INGREDIENTS = [
     { name: 'Kookoshelbed', emoji: '🥥', unit: 'g', caloriesPerUnit: 6.50, healthiness: 5 },
 ];
 
-export function seedTestData() {
+export async function seedTestData() {
     const ingredientsStore = useIngredientsStore.getState();
     const recipesStore = useRecipesStore.getState();
 
@@ -253,12 +253,14 @@ export function seedTestData() {
         return false;
     }
 
+    console.log('Seeding test data...');
+
     // Add ingredients and collect their IDs
     const ingredientIds = {};
-    TEST_INGREDIENTS.forEach((ing) => {
-        const added = ingredientsStore.addIngredient(ing);
+    for (const ing of TEST_INGREDIENTS) {
+        const added = await ingredientsStore.addIngredient(ing);
         ingredientIds[ing.name] = added.id;
-    });
+    }
 
     // Test recipes
     const TEST_RECIPES = [
@@ -550,9 +552,9 @@ export function seedTestData() {
     ];
 
     // Add recipes
-    TEST_RECIPES.forEach((recipe) => {
-        recipesStore.addRecipe(recipe);
-    });
+    for (const recipe of TEST_RECIPES) {
+        await recipesStore.addRecipe(recipe);
+    }
 
     console.log('Test data seeded successfully!');
     return true;
