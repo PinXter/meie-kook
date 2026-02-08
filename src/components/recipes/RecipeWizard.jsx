@@ -238,6 +238,7 @@ export default function RecipeWizard({ initialData, onComplete }) {
                         selectedIds={formData.selectedIngredientIds}
                         onSelect={handleIngredientSelect}
                         onAdd={() => setShowNewIngredientModal(true)}
+                        grouped={true}
                     />
                 )}
 
