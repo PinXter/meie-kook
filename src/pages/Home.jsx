@@ -18,7 +18,19 @@ export default function Home() {
 
     return (
         <PageContainer
-            title={<>Meie Köök 🍳 <span style={{ fontSize: '0.5em', fontWeight: 400, opacity: 0.5 }}>v1.1</span></>}
+            title={
+                <>
+                    Meie Köök 🍳{' '}
+                    <span style={{
+                        fontSize: '0.4em',
+                        fontWeight: 300,
+                        opacity: 0.4,
+                        marginLeft: '4px',
+                    }}>
+                        v1.2
+                    </span>
+                </>
+            }
             actions={
                 <Link to="/recipe/new" className="btn btn--primary">
                     ➕ Lisa

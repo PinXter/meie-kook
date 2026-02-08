@@ -34,7 +34,11 @@ export default function PageContainer({ children, title, actions }) {
                 <header
                     className={`page__header ${isHeaderVisible ? 'page__header--visible' : 'page__header--hidden'}`}
                 >
-                    <h1 className="page__title">{title}</h1>
+                    <h1 className="page__title">
+                        <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+                            {title}
+                        </Link>
+                    </h1>
                     <div className="page__actions">
                         <ThemeToggle />
 
