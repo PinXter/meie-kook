@@ -78,7 +78,7 @@ export default function Settings() {
                 <div className="card" style={{ padding: 'var(--spacing-lg)' }}>
                     <h2 style={{ marginBottom: 'var(--spacing-sm)' }}>App Info</h2>
                     <p style={{ color: 'var(--text-secondary)' }}>
-                        Version: <span className="version-tag">v1.3</span>
+                        Version: <span className="version-tag">v1.4</span>
                     </p>
                     <p style={{ color: 'var(--text-secondary)' }}>
                         Status: <span style={{ color: 'var(--healthy)' }}>Connected to Supabase</span>
