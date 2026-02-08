@@ -1,5 +1,4 @@
-import { useIngredientsStore } from '../store/ingredientsStore';
-import { useRecipesStore } from '../store/recipesStore';
+import { useIngredientsStore, useRecipesStore } from './store';
 
 // Comprehensive test ingredients - Estonian cuisine focused
 const TEST_INGREDIENTS = [
