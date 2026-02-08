@@ -14,7 +14,7 @@ export default function Home() {
 
     return (
         <PageContainer
-            title="Meie Köök 🍳"
+            title="Meie Köök 🍳 v1.0"
             actions={
                 <Link to="/recipe/new" className="btn btn--primary">
                     ➕ Lisa
