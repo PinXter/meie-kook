@@ -436,6 +436,20 @@ export async function clearAllShoppingItems() {
     return true;
 }
 
+export async function clearAllData() {
+    try {
+        // Delete in order to respect FKs
+        await supabase.from('recipe_ingredients').delete().neq('id', 0);
+        await supabase.from('shopping_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('recipes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabase.from('ingredients').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        return true;
+    } catch (error) {
+        console.error('Error in clearAllData:', error);
+        return false;
+    }
+}
+
 // ========================================
 // Realtime Subscriptions
 // ========================================

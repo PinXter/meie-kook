@@ -10,6 +10,7 @@ import RecipeEdit from './pages/RecipeEdit';
 import Shopping from './pages/Shopping';
 import Favorites from './pages/Favorites';
 import Trash from './pages/Trash';
+import Settings from './pages/Settings';
 import { useIngredientsStore, useRecipesStore, useShoppingStore } from './lib/store';
 import { seedTestData } from './lib/testData';
 import { subscribeToIngredients, subscribeToRecipes, subscribeToShoppingItems } from './lib/supabaseSync';
@@ -119,6 +120,7 @@ function App() {
         <Route path="/shopping" element={<Shopping />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/trash" element={<Trash />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
       <BottomNav />
       <ToastContainer />
