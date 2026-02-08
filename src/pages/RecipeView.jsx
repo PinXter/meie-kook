@@ -5,6 +5,7 @@ import PageContainer from '../components/layout/PageContainer';
 import ServingsScaler from '../components/recipes/ServingsScaler';
 import HealthBadge from '../components/common/HealthBadge';
 import Modal from '../components/common/Modal';
+import ShoppingModal from '../components/shopping/ShoppingModal';
 import {
     calculateTotalCalories,
     calculateHealthiness,
@@ -27,6 +28,8 @@ export default function RecipeView() {
 
     const [servings, setServings] = useState(recipe?.servings || 2);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showShoppingModal, setShowShoppingModal] = useState(false);
+    const [addedIngredients, setAddedIngredients] = useState([]);
 
     if (!recipe) {
         return (
@@ -57,8 +60,15 @@ export default function RecipeView() {
             amount: scaleAmount(ri.amount, originalServings, servings),
         }));
         addFromRecipe(recipe.id, scaledIngredients);
+        setAddedIngredients(scaledIngredients);
+        setShowShoppingModal(true);
         showToast('Lisatud ostunimekirja!', 'success');
-        navigate('/shopping');
+    };
+
+    const handleAddMore = () => {
+        setShowShoppingModal(false);
+        // Go back to recipes to add more
+        navigate('/');
     };
 
     const handleCopyIngredients = () => {
@@ -234,7 +244,20 @@ export default function RecipeView() {
                                         }}
                                     >
                                         <span style={{ fontSize: '1.5rem' }}>{ing.emoji || '🍽️'}</span>
-                                        <span style={{ flex: 1 }}>{ing.name}</span>
+                                        <Link
+                                            to={`/?ingredient=${ri.ingredientId}`}
+                                            style={{
+                                                flex: 1,
+                                                color: 'var(--text-primary)',
+                                                textDecoration: 'none',
+                                                transition: 'color 0.2s',
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.color = 'var(--accent)'}
+                                            onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
+                                            title={`Näita kõiki retsepte: ${ing.name}`}
+                                        >
+                                            {ing.name} 🔗
+                                        </Link>
                                         <span style={{ color: 'var(--accent)', fontWeight: 500 }}>
                                             {formatAmount(scaledAmount, ing.unit)}
                                         </span>
@@ -359,6 +382,14 @@ export default function RecipeView() {
                     Retsept viiakse prügikasti, kust saad selle hiljem taastada.
                 </p>
             </Modal>
+
+            {/* Shopping Modal */}
+            <ShoppingModal
+                isOpen={showShoppingModal}
+                onClose={() => setShowShoppingModal(false)}
+                addedItems={addedIngredients}
+                onAddMore={handleAddMore}
+            />
         </div>
     );
 }
