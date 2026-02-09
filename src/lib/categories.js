@@ -12,8 +12,10 @@ export const INGREDIENT_CATEGORIES = [
     { id: 'chocolate', label: 'Šokolaad', emoji: '🍫' },
     { id: 'nuts', label: 'Pähklid ja seemned', emoji: '🥜' },
     { id: 'legumes', label: 'Kaunviljad', emoji: '🫘' },
+    { id: 'canned', label: 'Konservid', emoji: '🥫' },
     { id: 'sauces', label: 'Kastmed', emoji: '🍅' },
-    { id: 'drinks', label: 'Joogid', emoji: '🍷' },
+    { id: 'alcohol', label: 'Alkohol', emoji: '🍸' },
+    { id: 'drinks', label: 'Joogid', emoji: '☕' },
     { id: 'other', label: 'Muud', emoji: '🍽️' },
 ];
 

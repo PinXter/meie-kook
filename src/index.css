@@ -72,9 +72,10 @@
   --radius-full: 9999px;
 
   /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Z-index */
   --z-dropdown: 100;
@@ -327,6 +328,63 @@ select {
   resize: vertical;
 }
 
+/* Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  margin-top: -7px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(255, 107, 53, 0.4);
+}
+
+input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+
 /* ========================================
    Component: Card
    ======================================== */
@@ -336,13 +394,21 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  transition: all var(--transition-normal);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .card:hover {
   border-color: var(--accent);
   transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md), 0 0 12px rgba(255, 107, 53, 0.08);
+}
+
+.card:active {
+  transform: translateY(-1px);
+  transition-duration: 0.1s;
 }
 
 .card__image {
@@ -547,9 +613,12 @@ select {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  padding: var(--spacing-sm) var(--spacing-md);
+  width: 100%;
+  background: rgba(20, 20, 20, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: var(--spacing-sm) 0;
   padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom));
   z-index: var(--z-navbar);
 }
@@ -558,12 +627,14 @@ select {
   display: flex;
   justify-content: space-around;
   list-style: none;
-  max-width: 500px;
+  max-width: 1280px;
   margin: 0 auto;
+  padding: 0 var(--spacing-md);
 }
 
 .bottom-nav__item {
   flex: 1;
+  max-width: 120px;
 }
 
 .bottom-nav__link {
@@ -571,21 +642,32 @@ select {
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
   color: var(--text-secondary);
   font-size: var(--font-size-xs);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  border-radius: var(--radius-md);
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
-.bottom-nav__link:hover,
+.bottom-nav__link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
 .bottom-nav__link--active {
   color: var(--accent);
 }
 
 .bottom-nav__icon {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
 }
+
+[data-theme="light"] .bottom-nav {
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
 
 /* ========================================
    Component: Ingredient Grid
@@ -723,61 +805,115 @@ select {
    Layout: Page Container
    ======================================== */
 
-.page {
-  flex: 1;
-  padding-bottom: 80px;
+/* Content area with max-width constraint */
+.page-content {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  padding-bottom: 100px;
   /* Space for bottom nav */
 }
 
-.page__header {
+/* ========================================
+   Site Header (Full-width sticky)
+   ======================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.site-header__inner {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-lg) var(--spacing-md);
-  background: rgba(20, 20, 20, 0.85);
-  /* Dark mode default */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 40;
+  gap: var(--spacing-md);
 }
 
-/* Add a pseudo-element or adjust content directly if possible, 
-   but for now just increasing padding is the safest CSS-only fix 
-   without changing HTML structure too much. */
-@media (min-width: 768px) {
-  .page__header {
-    padding: var(--spacing-lg) var(--spacing-xl);
-    justify-content: center;
-    /* Center content if we add a container later, currently just spaces it out */
-  }
-
-  /* Create a max-width feel for the content inside header */
-  .page__header>* {
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-[data-theme="light"] .page__header {
-  background: rgba(255, 255, 255, 0.85);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.page__title {
-  font-size: var(--font-size-2xl);
+.site-header__title {
+  font-size: var(--font-size-lg);
   font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
-.page__content {
-  padding: var(--spacing-md);
+.site-header__title a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
 }
+
+.site-header__title a:hover {
+  opacity: 0.8;
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.site-header__cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.site-header__cart:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.site-header__cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Light mode */
+[data-theme="light"] .site-header {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Scrolled state */
+body.scrolled .site-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
 
 /* ========================================
    Component: Empty State
@@ -971,10 +1107,6 @@ select {
 @media (min-width: 768px) {
   .ingredient-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  }
-
-  .bottom-nav {
-    display: none;
   }
 }
 

@@ -17,8 +17,12 @@ export default function Ingredients() {
     const [editingIngredient, setEditingIngredient] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
-    const handleAdd = (data) => {
-        addIngredient(data);
+    const handleAdd = async (data) => {
+        const result = await addIngredient(data);
+        if (result === null) {
+            showToast(`"${data.name}" juba eksisteerib!`, 'error');
+            return;
+        }
         setShowAddModal(false);
         showToast('Koostisosa lisatud!', 'success');
     };

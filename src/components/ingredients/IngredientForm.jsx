@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getAvailableUnits, validateIngredient } from '../../lib/utils';
+import { INGREDIENT_CATEGORIES } from '../../lib/categories';
 
 const POPULAR_EMOJIS = [
     '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍒',
@@ -19,6 +20,7 @@ export default function IngredientForm({ initialData, onSubmit, onCancel }) {
         unit: initialData?.unit || 'g',
         caloriesPerUnit: initialData?.caloriesPerUnit || '',
         healthiness: initialData?.healthiness || 5,
+        category: initialData?.category || 'vegetables',
     });
     const [errors, setErrors] = useState({});
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -136,6 +138,21 @@ export default function IngredientForm({ initialData, onSubmit, onCancel }) {
                     ))}
                 </select>
                 {errors.unit && <span className="input-error">{errors.unit}</span>}
+            </div>
+
+            <div className="input-group">
+                <label className="input-label">Kategooria</label>
+                <select
+                    className="input"
+                    value={formData.category}
+                    onChange={(e) => handleChange('category', e.target.value)}
+                >
+                    {INGREDIENT_CATEGORIES.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                            {cat.emoji} {cat.label}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div className="input-group">

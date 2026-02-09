@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import BottomNav from './components/layout/BottomNav';
 import ToastContainer from './components/common/ToastContainer';
@@ -19,6 +19,7 @@ import './index.css';
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState('connecting');
+  const seedingRef = useRef(false); // Prevent multiple seed calls
 
   const fetchIngredients = useIngredientsStore((state) => state.fetchIngredients);
   const fetchRecipes = useRecipesStore((state) => state.fetchRecipes);
@@ -70,13 +71,22 @@ function App() {
     };
   }, [fetchIngredients, fetchRecipes, fetchShoppingItems]);
 
-  // Seed test data if no ingredients exist (first run with empty Supabase)
+  // Seed test data if data is incomplete (less than 400 ingredients)
   useEffect(() => {
-    if (!isLoading && ingredientsCount === 0) {
-      console.log('No ingredients found, seeding test data...');
-      seedTestData();
+    if (!isLoading && ingredientsCount < 600 && !seedingRef.current) {
+      seedingRef.current = true; // Mark as seeding to prevent re-entry
+      console.log(`Only ${ingredientsCount} ingredients found, seeding test data...`);
+      seedTestData().then(() => {
+        console.log('Seeding complete!');
+      }).catch((err) => {
+        console.error('Seeding failed:', err);
+        seedingRef.current = false; // Allow retry on error
+      });
     }
   }, [isLoading, ingredientsCount]);
+
+
+
 
   if (isLoading) {
     return (

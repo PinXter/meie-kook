@@ -1,6 +1,39 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import * as sync from './supabaseSync';
+import { INGREDIENT_CATEGORIES } from './categories';
+
+// Helper to guess category based on name (for legacy data)
+const guessCategory = (name) => {
+  const lowerName = name.toLowerCase();
+
+  const keywords = {
+    vegetables: ['kartul', 'porgand', 'sibul', 'küüslauk', 'kurk', 'tomat', 'kapsas', 'paprika', 'suvikõrvits', 'kõrvits', 'peet', 'redis', 'kaalikas', 'lillkapsas', 'brokoli', 'salat', 'spinat', 'seller', 'porrulauk', 'spargel', 'baklažaan', 'lehtsalat', 'rukola', 'herned', 'aedoad', 'mais', 'tšilli', 'jalapen', 'kohlrabi', 'idand', 'okra', 'bataat', 'fenkol', 'artisokk', 'guacamole'],
+    fruits: ['õun', 'pirn', 'banaan', 'apelsin', 'sidrun', 'laim', 'greip', 'maasikas', 'vaarikas', 'mustikas', 'jõhvikas', 'ploom', 'kirss', 'viinamari', 'arbuus', 'melon', 'mango', 'avokaado', 'ananass', 'kiivi', 'granaatõun', 'virsik', 'nektariin', 'aprikoos', 'datlid', 'rosinad', 'karumarj', 'astelpaju', 'meltikas', 'mandariin', 'dattel'],
+    meat: ['kana', 'veis', 'siga', 'lammas', 'hakkliha', 'sink', 'peekon', 'vorst', 'viiner', 'sardell', 'kalkun', 'part', 'liha', 'filee', 'ribi', 'praad', 'koot', 'kotlet', 'lihakeha', 'suitsu', 'maks', 'chorizo'],
+    fish: ['lõhe', 'forell', 'heeringas', 'kilu', 'tursk', 'ahven', 'koha', 'luts', 'krevetid', 'krabi', 'tuunikala', 'kala', 'krevett', 'mereand', 'karp', 'angerjad', 'kalmaar', 'sardiinid', 'auster', 'kaheksajalg'],
+    dairy: ['piim', 'koor', 'hapukoor', 'keefir', 'jogurt', 'kohupiim', 'kodujuust', 'juust', 'või', 'muna', 'mozzarella', 'parmesaan', 'ricotta', 'feta', 'kreemjuust', 'mascarpone', 'cheddar', 'kefir', 'halloumi', 'gorgonzola', 'margariin'],
+    grains: ['jahu', 'riis', 'tatar', 'makaron', 'pasta', 'kaerahelbed', 'leib', 'sai', 'sepik', 'tangud', 'kruubid', 'nisu', 'rukis', 'spagetid', 'nuudlid', 'couscous', 'bulgur', 'helbed', 'müsli', 'manna', 'kuskuss', 'hirss', 'kinoa', 'kaerakliid', 'cornflakes', 'leivapuru', 'granola'],
+    spices: ['sool', 'pipar', 'maitseaine', 'ürt', 'basiilik', 'till', 'petersell', 'oregano', 'tüümian', 'rosmariin', 'köömen', 'paprikapulber', 'kurkum', 'ingver', 'kaneel', 'nelk', 'kardemon', 'loorber', 'muskaatpähkel', 'koriander', 'mündi', 'salvei', 'küpsetuspulber'],
+    oils: ['õli', 'oliiviõli', 'taimeõli', 'kookosõli', 'seesamiõli', 'avokaadoõli'],
+    sweeteners: ['suhkur', 'mesi', 'siirup', 'stevia', 'ksülitool', 'melassi', 'agaavi', 'moos'],
+    sauces: ['äädikas', 'sinep', 'ketšup', 'majonees', 'kastme', 'sojakaste', 'sriracha', 'tabasco', 'pesto', 'salsa', 'puljong', 'tomatipass', 'balsamico', 'bbq', 'mädarõigas'],
+    nuts: ['pähkel', 'mandel', 'kreeka', 'sarapuu', 'pistaatsia', 'cashew', 'maapähkel', 'seeme', 'päevalill', 'lina', 'seesamiseemned', 'tšia', 'chia', 'kanepiseemne', 'india'],
+    legumes: ['oad', 'lääts', 'kikerhern', 'soja', 'tofu', 'edamame', 'herned', 'hummus'],
+    canned: ['konserv', 'purk', 'purgi', 'kapers', 'oliiv'],
+    drinks: ['vein', 'õlu', 'konjak', 'viski', 'rumm', 'liköör', 'mahl', 'kohv', 'tee', 'kakao', 'siider', 'vesi', 'espresso'],
+    alcohol: ['viin', 'vodka', 'džinn', 'gin', 'tekiila', 'whisky', 'brandy', 'vermut', 'campari', 'aperol', 'baileys', 'amaretto', 'sambuca', 'jägermeister', 'absint', 'kokteil', 'prosecco', 'šampanja', 'likööri'],
+    chocolate: ['šokolaad', 'nutella'],
+  };
+
+  for (const [category, words] of Object.entries(keywords)) {
+    if (words.some(word => lowerName.includes(word))) {
+      return category;
+    }
+  }
+
+  return 'other';
+};
 
 // ========================================
 // Ingredients Store (Supabase-synced)
@@ -16,7 +49,33 @@ export const useIngredientsStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const data = await sync.fetchIngredients();
-      set({ ingredients: data, isLoading: false, isOnline: true });
+
+      // Auto-fix missing categories for legacy data
+      const processedData = data.map(ing => {
+        if (!ing.category || ing.category === 'other') {
+          // Try to guess based on name if category is missing or 'other'
+          const guessed = guessCategory(ing.name);
+          if (guessed !== 'other') {
+            // Return with guessed category (but don't save to DB yet to avoid spamming updates)
+            // In a real app we might want to background sync these fixes
+            return { ...ing, category: guessed };
+          }
+        }
+        return ing;
+      });
+
+      // Deduplicate by name (keep first occurrence)
+      const seen = new Set();
+      const deduplicatedData = processedData.filter(ing => {
+        const key = ing.name.toLowerCase().trim();
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+
+      set({ ingredients: deduplicatedData, isLoading: false, isOnline: true });
     } catch (error) {
       console.error('Failed to fetch ingredients:', error);
       set({ isLoading: false, isOnline: false });
@@ -24,35 +83,31 @@ export const useIngredientsStore = create((set, get) => ({
   },
 
   addIngredient: async (ingredient) => {
-    const tempId = uuidv4();
-    const tempIngredient = {
-      id: tempId,
-      createdAt: new Date().toISOString(),
-      ...ingredient,
-    };
-
-    // Optimistic update
-    set((state) => ({
-      ingredients: [...state.ingredients, tempIngredient],
-    }));
-
-    // Sync to Supabase
+    // Check database first - no optimistic update until we confirm it's not a duplicate
     try {
-      const created = await sync.createIngredient(ingredient);
-      if (created) {
-        // Replace temp with real
-        set((state) => ({
-          ingredients: state.ingredients.map((i) =>
-            i.id === tempId ? created : i
-          ),
-        }));
-        return created;
-      }
-    } catch (error) {
-      console.error('Failed to sync ingredient:', error);
-    }
+      const result = await sync.createIngredient(ingredient);
 
-    return tempIngredient;
+      // Check if it's a duplicate response from database
+      if (result && result.duplicate) {
+        // console.warn(`Ingredient "${ingredient.name}" already exists in database.`);
+        return result.existing; // Return existing ingredient so caller can use its ID
+      }
+
+      if (result && result.id) {
+        // Successfully created in DB, now add to local store
+        set((state) => ({
+          ingredients: [...state.ingredients, result],
+        }));
+        return result;
+      }
+
+      // Something went wrong (null result without duplicate flag)
+      console.error('Failed to create ingredient - unknown error');
+      return null;
+    } catch (error) {
+      console.error('Failed to create ingredient:', error);
+      return null;
+    }
   },
 
   updateIngredient: async (id, updates) => {

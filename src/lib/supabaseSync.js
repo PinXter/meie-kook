@@ -44,6 +44,17 @@ export async function fetchIngredients() {
 }
 
 export async function createIngredient(ingredient) {
+    // Check for duplicate in database first (case-insensitive)
+    const { data: existing } = await supabase
+        .from('ingredients')
+        .select('id, name')
+        .ilike('name', ingredient.name.trim());
+
+    if (existing && existing.length > 0) {
+        console.warn(`Ingredient "${ingredient.name}" already exists in database.`);
+        return { duplicate: true, existing: toCamelCase(existing[0]) };
+    }
+
     const payload = toSnakeCase({
         name: ingredient.name,
         emoji: ingredient.emoji,
@@ -246,6 +257,32 @@ export async function updateRecipe(id, updates) {
     const result = toCamelCase(data);
     result.ingredients = updates.ingredients || [];
     return result;
+}
+
+export async function deleteAllRecipes() {
+    // First delete all recipe_ingredients (foreign key constraint)
+    const { error: riError } = await supabase
+        .from('recipe_ingredients')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+    if (riError) {
+        console.error('Error deleting recipe ingredients:', riError);
+        return false;
+    }
+
+    // Then delete all recipes
+    const { error } = await supabase
+        .from('recipes')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+    if (error) {
+        console.error('Error deleting recipes:', error);
+        return false;
+    }
+
+    return true;
 }
 
 export async function deleteRecipe(id, permanent = false) {

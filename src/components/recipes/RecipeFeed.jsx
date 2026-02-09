@@ -21,6 +21,7 @@ export default function RecipeFeed({ recipes, ingredientFilter = null }) {
     const [search, setSearch] = useState('');
     const [courseFilter, setCourseFilter] = useState('');
     const [sortBy, setSortBy] = useState('newest');
+    const [maxCalories, setMaxCalories] = useState(2000); // Max calories per serving filter
 
     const ingredients = useIngredientsStore((state) => state.ingredients);
 
@@ -47,6 +48,15 @@ export default function RecipeFeed({ recipes, ingredientFilter = null }) {
             result = result.filter((r) =>
                 r.ingredients?.some((ri) => ri.ingredientId === ingredientFilter)
             );
+        }
+
+        // Calorie filter (per serving)
+        if (maxCalories < 2000) {
+            result = result.filter((r) => {
+                if (!r.ingredients?.length) return true;
+                const cal = calculateTotalCalories(r.ingredients, ingredients, 1, r.servings || 1);
+                return cal <= maxCalories;
+            });
         }
 
         // Sorting
@@ -90,7 +100,7 @@ export default function RecipeFeed({ recipes, ingredientFilter = null }) {
         });
 
         return result;
-    }, [recipes, search, courseFilter, sortBy, ingredients, ingredientFilter]);
+    }, [recipes, search, courseFilter, sortBy, ingredients, ingredientFilter, maxCalories]);
 
     const courses = getCourseTypes();
     const activeIngredient = ingredientFilter ? ingredients.find(i => i.id === ingredientFilter) : null;
@@ -121,6 +131,55 @@ export default function RecipeFeed({ recipes, ingredientFilter = null }) {
                     <a href="/" style={{ color: 'white' }}>✕ Tühista</a>
                 </div>
             )}
+
+            {/* Calorie filter slider */}
+            <div style={{
+                marginTop: 'var(--spacing-md)',
+                padding: 'var(--spacing-md)',
+                background: 'var(--bg-card)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border)',
+            }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 'var(--spacing-sm)',
+                }}>
+                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+                        🔥 Kalorid portsioni kohta
+                    </span>
+                    <span style={{
+                        fontSize: 'var(--font-size-sm)',
+                        fontWeight: 600,
+                        color: maxCalories < 2000 ? 'var(--accent)' : 'var(--text-muted)',
+                    }}>
+                        {maxCalories < 2000 ? `kuni ${maxCalories} kcal` : 'Kõik'}
+                    </span>
+                </div>
+                <input
+                    type="range"
+                    min="100"
+                    max="2000"
+                    step="50"
+                    value={maxCalories}
+                    onChange={(e) => setMaxCalories(Number(e.target.value))}
+                    className="calorie-slider"
+                    style={{
+                        background: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${((maxCalories - 100) / 1900) * 100}%, var(--border) ${((maxCalories - 100) / 1900) * 100}%, var(--border) 100%)`
+                    }}
+                />
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: 'var(--spacing-xs)',
+                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--text-muted)',
+                }}>
+                    <span>100 kcal</span>
+                    <span>2000+ kcal</span>
+                </div>
+            </div>
 
             {/* Course filter chips */}
             <div className="filter-chips" style={{ marginTop: 'var(--spacing-md)' }}>

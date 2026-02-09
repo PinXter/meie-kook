@@ -71,8 +71,8 @@ export function formatAmount(amount, unit) {
 export function getUnitLabel(unit, plural = true) {
     const units = {
         g: 'grammi',
-        kg: 'kg',
-        ml: 'ml',
+        kg: 'kilogrammi',
+        ml: 'milliliitrit',
         l: 'liitrit',
         tsp: 'teelusikat',
         tbsp: 'supilusikat',
@@ -111,6 +111,7 @@ export function getCourseTypes() {
         { value: 'dessert', label: 'Magustoit', emoji: '🍰' },
         { value: 'snack', label: 'Suupiste', emoji: '🍿' },
         { value: 'drink', label: 'Jook', emoji: '🥤' },
+        { value: 'bailando', label: 'Bailando', emoji: '🍸' },
         { value: 'breakfast', label: 'Hommikusöök', emoji: '🍳' },
         { value: 'soup', label: 'Supp', emoji: '🍲' },
     ];

@@ -256,7 +256,15 @@ export default function RecipeView() {
                                             onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
                                             title={`Näita kõiki retsepte: ${ing.name}`}
                                         >
-                                            {ing.name} 🔗
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span>{ing.name} 🔗</span>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                                    {['g', 'ml'].includes(ing.unit)
+                                                        ? `${Math.round(ing.caloriesPerUnit * 100)} kcal / 100${ing.unit}`
+                                                        : `${Math.round(ing.caloriesPerUnit)} kcal / ${ing.unit}`
+                                                    }
+                                                </span>
+                                            </div>
                                         </Link>
                                         <span style={{ color: 'var(--accent)', fontWeight: 500 }}>
                                             {formatAmount(scaledAmount, ing.unit)}

@@ -66,8 +66,14 @@ export default function RecipeWizard({ initialData, onComplete }) {
         }
     };
 
-    const handleNewIngredient = (ingredientData) => {
-        const newIngredient = addIngredient(ingredientData);
+    const handleNewIngredient = async (ingredientData) => {
+        const newIngredient = await addIngredient(ingredientData);
+
+        if (newIngredient === null) {
+            showToast(`"${ingredientData.name}" juba eksisteerib!`, 'error');
+            return;
+        }
+
         setShowNewIngredientModal(false);
         handleIngredientSelect(newIngredient);
         showToast('Koostisosa lisatud!', 'success');

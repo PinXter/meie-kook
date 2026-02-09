@@ -59,17 +59,6 @@ export default function BottomNav() {
                         <span>Lemmikud</span>
                     </NavLink>
                 </li>
-                <li className="bottom-nav__item">
-                    <NavLink
-                        to="/settings"
-                        className={({ isActive }) =>
-                            `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-                        }
-                    >
-                        <span className="bottom-nav__icon">⚙️</span>
-                        <span>Settings</span>
-                    </NavLink>
-                </li>
             </ul>
         </nav>
     );
