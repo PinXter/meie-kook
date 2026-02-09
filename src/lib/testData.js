@@ -459,6 +459,7 @@ const TEST_INGREDIENTS = [
     { name: 'Trühvlipasta (must)', emoji: '🍄', unit: 'tsp', caloriesPerUnit: 15, healthiness: 8, category: 'sauces' },
     { name: 'Mais (popkorn)', emoji: '🍿', unit: 'g', caloriesPerUnit: 3.87, healthiness: 7, category: 'grains' },
     { name: 'Vutimunad', emoji: '🥚', unit: 'pc', caloriesPerUnit: 14, healthiness: 8, category: 'dairy' },
+    { name: 'Kakaopulber', emoji: '🍫', unit: 'tbsp', caloriesPerUnit: 22, healthiness: 8, category: 'spices' },
 ];
 
 /* export async function seedTestData() {
@@ -466,8 +467,8 @@ const TEST_INGREDIENTS = [
     const recipesStore = useRecipesStore.getState();
 
     // Only skip seed if we have a substantial amount of data (complete seed)
-    // Use 600 as threshold since we have ~400 ingredients now
-    if (ingredientsStore.ingredients.length > 600) {
+    // Use 2000 as threshold since we have ~400 ingredients now, but allow updates
+    if (ingredientsStore.ingredients.length > 2000) {
         console.log('Data appears complete, skipping seed');
         return false;
     }
@@ -498,6 +499,26 @@ const TEST_INGREDIENTS = [
                 );
                 if (existing) {
                     ingredientIds[ing.name] = existing.id;
+                    
+                    // FIX: Update category if it doesn't match test data (e.g. was falsely guessed as 'drinks' or 'other')
+                    if (existing.category !== ing.category) {
+                        console.log(`Fixing category for ${ing.name}: ${existing.category} -> ${ing.category}`);
+                        // We use the store action if available, or just ignore for now as 'update' might not be exposed in store
+                        // Checking store capabilities... 'addIngredient' is there. 'updateIngredient'?
+                        // Store doesn't seem to expose updateIngredient directly in the snippet I saw.
+                        // But I can import 'updateIngredient' from supabaseSync if needed, or just warn.
+                        // actually, let's try to update it via direct call if possible, or just log.
+                        // Ideally we should update it.
+                         try {
+                            const { updateIngredient } = await import('./supabaseSync');
+                            await updateIngredient(existing.id, { category: ing.category });
+                            // Update local store to reflect change immediately?
+                             existing.category = ing.category; // optimistic-ish update for this session
+                        } catch (e) {
+                            console.error('Failed to update category', e);
+                        }
+                    }
+
                 } else {
                     console.warn(`Could not find ID for ingredient: ${ing.name}`);
                     errorCount++;

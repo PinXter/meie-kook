@@ -21,8 +21,8 @@ const guessCategory = (name) => {
     nuts: ['pähkel', 'mandel', 'kreeka', 'sarapuu', 'pistaatsia', 'cashew', 'maapähkel', 'seeme', 'päevalill', 'lina', 'seesamiseemned', 'tšia', 'chia', 'kanepiseemne', 'india'],
     legumes: ['oad', 'lääts', 'kikerhern', 'soja', 'tofu', 'edamame', 'herned', 'hummus'],
     canned: ['konserv', 'purk', 'purgi', 'kapers', 'oliiv'],
-    drinks: ['vein', 'õlu', 'konjak', 'viski', 'rumm', 'liköör', 'mahl', 'kohv', 'tee', 'kakao', 'siider', 'vesi', 'espresso'],
-    alcohol: ['viin', 'vodka', 'džinn', 'gin', 'tekiila', 'whisky', 'brandy', 'vermut', 'campari', 'aperol', 'baileys', 'amaretto', 'sambuca', 'jägermeister', 'absint', 'kokteil', 'prosecco', 'šampanja', 'likööri'],
+    drinks: ['mahl', 'kohv', 'tee', 'kakao', 'vesi', 'espresso', 'limonaad', 'coca', 'fanta', 'sprite', 'toonik', 'kali', 'smuuti', 'jook'],
+    alcohol: ['vein', 'õlu', 'konjak', 'viski', 'rumm', 'liköör', 'viin', 'vodka', 'džinn', 'gin', 'tekiila', 'whisky', 'brandy', 'vermut', 'campari', 'aperol', 'baileys', 'amaretto', 'sambuca', 'jägermeister', 'absint', 'kokteil', 'prosecco', 'šampanja', 'siider'],
     chocolate: ['šokolaad', 'nutella'],
   };
 
